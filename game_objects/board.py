@@ -1,8 +1,8 @@
 
 import random
 from load_cards import load_cards
-from card import Card
-from noble import Noble
+from game_objects.card import Card
+from game_objects.noble import Noble
 
 color_to_int = {
     'RED': 0,
@@ -28,10 +28,13 @@ def make_noble(noble_dict):
 
 class Board:
     def __init__(self):
-        self.current_cards = [[None] * 4] * 3 # cards on the table
+        #self.current_cards = [[None] * 4] * 3 # cards on the table
+        self.current_cards = [[None] * 4 for _ in range(3)] # Why do it like this? - Python references are retarded, as am I
+
         # self.bottom_cards = [None] * 4
         # self.middle_cards = [None] * 4
         # self.top_cards = [None] * 4
+
         self.deck = [None] * 3 # One for each level of cards
         self.nobles = [None] * 3
         self.noble_deck = []
@@ -58,8 +61,8 @@ class Board:
         for i, stack in enumerate(self.current_cards):
             for r, card in enumerate(stack):
                 if card == None:
-                    new_card = random.randint(0, len(self.current_cards[i])-1)
-                    self.current_cards[i][r] = self.deck[new_card]
+                    new_card = random.randint(0, len(self.deck[i])-1)
+                    self.current_cards[i][r] = self.deck[i][new_card] # Index deck by i because of levels of cards
                     self.deck[i].pop(new_card) # Pycharm gives error since it thinks deck[i] holds a None type
 
     def get_nobles(self):
