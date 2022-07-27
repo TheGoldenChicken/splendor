@@ -4,6 +4,9 @@ from load_cards import load_cards
 from game_objects.card import Card
 from game_objects.noble import Noble
 
+# TODO:
+    # Find out why color_to_int and two functions are not 'missing' when only importing Board from this file... ;_;
+
 color_to_int = {
     'RED': 0,
     'GREEN': 1,
@@ -25,6 +28,7 @@ def make_noble(noble_dict):
     for color, price in noble_dict['price'].items():
         cost[color_to_int[color]] = price
     return Noble(cost)
+
 
 class Board:
     def __init__(self):
@@ -69,22 +73,11 @@ class Board:
         curr_nobles = random.sample(range(0,len(self.noble_deck)), 3)
         self.nobles = [self.noble_deck[i] for i in curr_nobles]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def init(self, cards):
+        self.reset_decks(cards)
+        self.reset_noble_deck(cards)
+        self.get_nobles()
+        self.populate_board()
 
 #
 # self.cards[i] = [card if card is not None
