@@ -33,7 +33,8 @@ def make_noble(noble_dict):
 class Board:
     def __init__(self):
         #self.current_cards = [[None] * 4] * 3 # cards on the table
-        self.current_cards = [[None] * 4 for _ in range(3)] # Why do it like this? - Python references are retarded, as am I
+        #self.current_cards = [[None] * 4 for _ in range(3)] # Why do it like this? - Python references are retarded, as am I
+        self.current_cards = [None] * 12 # Simpler approach
 
         # self.bottom_cards = [None] * 4
         # self.middle_cards = [None] * 4
@@ -42,12 +43,18 @@ class Board:
         self.deck = [None] * 3 # One for each level of cards
         self.nobles = [None] * 3
         self.noble_deck = []
+        self.coins = [0,0,0,0,0,0]
+
+    def reset_coins(self, players):
+        self.coins = [7,7,7,7,7,5] #RGBBW - GOLD
 
     def reset_board(self, specific_level=False):
-        if specific_level == False:
-            self.current_cards = [[None] * 4] * 3
-        else:
-            self.current_cards[specific_level] = [None] * 4
+        # if specific_level == False:
+        #     self.current_cards = [[None] * 4] * 3
+        # else:
+        #     self.current_cards[specific_level] = [None] * 4
+        self.current_cards = [None] * 12
+
 
     def reset_decks(self,cards, specific_level=False):
         # cards = load_cards() # Don't load cards every time since this might take time
@@ -62,12 +69,19 @@ class Board:
         """
         call after taking cards from board
         """
-        for i, stack in enumerate(self.current_cards):
-            for r, card in enumerate(stack):
-                if card == None:
-                    new_card = random.randint(0, len(self.deck[i])-1)
-                    self.current_cards[i][r] = self.deck[i][new_card] # Index deck by i because of levels of cards
-                    self.deck[i].pop(new_card) # Pycharm gives error since it thinks deck[i] holds a None type
+        # for i, stack in enumerate(self.current_cards):
+        #     for r, card in enumerate(stack):
+        #         if card == None:
+        #             new_card = random.randint(0, len(self.deck[i])-1)
+        #             self.current_cards[i][r] = self.deck[i][new_card] # Index deck by i because of levels of cards
+        #             self.deck[i].pop(new_card) # Pycharm gives error since it thinks deck[i] holds a None type
+
+        for i, card in enumerate(self.current_cards):
+            if card == None:
+                card_level = i // 4
+                new_card = random.randint(0, len(self.deck[card_level])-1)
+                self.current_cards[i] = self.deck[card_level][new_card]
+                self.deck[card_level].pop(new_card)  # Pycharm gives error since it thinks deck[i] holds a None type
 
     def get_nobles(self):
         curr_nobles = random.sample(range(0,len(self.noble_deck)), 3)
