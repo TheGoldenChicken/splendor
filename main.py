@@ -12,7 +12,9 @@ new_board.reset_noble_deck(cards)
 new_board.get_nobles()
 new_board.populate_board()
 
-print(new_board.current_cards)
+
+# Currently, 3 rows of 4 cards, as it should be
+print(len(new_board.current_cards[0]))
 
 # TODO:
     # add .config file so all settings can be changed
