@@ -83,6 +83,14 @@ class Board:
                 self.current_cards[i] = self.deck[card_level][new_card]
                 self.deck[card_level].pop(new_card)  # Pycharm gives error since it thinks deck[i] holds a None type
 
+    def remove_card(self, card_to_remove):
+        """
+        Removes card based on its specific object
+        """
+        for i, card in enumerate(self.current_cards):
+            if card == card_to_remove:
+                self.current_cards[i] = None
+
     def get_nobles(self):
         curr_nobles = random.sample(range(0,len(self.noble_deck)), 3)
         self.nobles = [self.noble_deck[i] for i in curr_nobles]
