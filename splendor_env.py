@@ -41,4 +41,13 @@ class splendor_env:
         pass
 
     def step(self):
+        # Ok, so there's a major problem here:
+        # Basically the step function needs to take one round of input for each player representing their actions
+        # Basically a one-hot encoding of what they're gonna do...
+        # But, if they make an illegal move, there is no way to have them do anything else
+        # UNLESS, if they make an illegal move, we just have them do a random move...
+        for current_player in self.players:
+            while not current_player.taken_turn:
+
+
         pass

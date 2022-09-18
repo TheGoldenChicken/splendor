@@ -1,3 +1,8 @@
+import tools
+
+abomination = [[0] * i + [2] + [0] * (4-i) for i in range(5)] # abomination list comprehension
+unique_combinations = list(abomination + tools.unique_combinations([0,1,2,3,4], r=3))
+
 color_to_int = {
     'RED': 0,
     'GREEN': 1,
@@ -18,6 +23,7 @@ class Player:
         self.board = None # The current game board that the player plays at
         self.taken_turn = False
         self.cards = [] # Supposed to hold game_object.card.Card objects
+        self.legal_moves = self.get_legal_moves(existing_dict=False, one_hot=False)
 
     def update_mines_and_points_and_nobles(self):
         """
@@ -47,68 +53,84 @@ class Player:
         :param one_hot: Whether coins_to_take is given as a one-hot encoding vector
         :return:
         """
-
-        if sum(self.coins) >= 10:
-            print("Too many coins")
-            return False
-
-        # Add double numbers if one_hot
-        if one_hot and 0 < sum(coins_to_take[:5]) < 3: # This shit ugly, np.nonzero would have worked fine
-            double_grab = next((i for i, x in enumerate(coins_to_take) if x), None) # coin to grab doubble of
-            if not self.board.coins[double_grab] < 2:
-                self.coins[double_grab] += 2
-                return True # Returns true to indicate turn has passed
-            else:
-                print("Not enough coins of that type to grab double!")
-                return False
-
-        offset = 5 * one_hot
-        if sum([i for i, e in enumerate(coins_to_take[offset:]) if e != 0]) > 3:
-            for i, r in enumerate(coins_to_take[offset:]):
-                if self.board.coins[i] < r:
-                    print("No enough coins of that type to grab")
-                    return False
-                self.coins[i] += r
-            # Use walrus operator if possible?
-            return True
-
-        print("You're either getting too many coins, or too many of the same type!")
-        return False
-
+        return self.legal_moves[coins_to_take]
+        # if sum(self.coins) >= 10:
+        #     print("Too many coins")
+        #     return False
+        #
+        # # Add double numbers if one_hot
+        # if one_hot and 0 < sum(coins_to_take[:5]) < 3: # This shit ugly, np.nonzero would have worked fine
+        #     double_grab = next((i for i, x in enumerate(coins_to_take) if x), None) # coin to grab doubble of
+        #     if not self.board.coins[double_grab] < 2:
+        #         self.coins[double_grab] += 2
+        #         return True # Returns true to indicate turn has passed
+        #     else:
+        #         print("Not enough coins of that type to grab double!")
+        #         return False
+        #
+        # offset = 5 * one_hot
+        # if sum([i for i, e in enumerate(coins_to_take[offset:]) if e != 0]) > 3:
+        #     for i, r in enumerate(coins_to_take[offset:]):
+        #         if self.board.coins[i] < r:
+        #             print("No enough coins of that type to grab")
+        #             return False
+        #         self.coins[i] += r
+        #     # Use walrus operator if possible?
+        #     return True
+        #
+        # print("You're either getting too many coins, or too many of the same type!")
+        # return False
+        #
 
     def reserve_card(self, to_reserve):
-        if len(self.reserved_cards) >= 3:
-            print('Too many reserved cards')
-            return
-        if self.board.coins[-1] <= 0:
-            print('Not enough gold coins')
-            return
-        if sum(self.coins) >= 10:
-            print('Too many coins')
-            return
+        #
+        # if len(self.reserved_cards) >= 3:
+        #     print('Too many reserved cards')
+        #     return
+        # if self.board.coins[-1] <= 0:
+        #     print('Not enough gold coins')
+        #     return
+        # if sum(self.coins) >= 10:
+        #     print('Too many coins')
+        #     return
 
-        self.reserved_cards.append(self.board.current_cards[to_reserve])
-        self.board.remove_card(to_reserve)
-        self.board.populate_board()
-        self.coins[-1] += 1
-        self.taken_turn = True
-
-    def purchase_card(self, card_to_purchase, from_reserved):
-        if from_reserved:
-            card = self.reserved_cards[card_to_purchase]
-        else:
-            card = self.board.current_cards[card_to_purchase]
+        if self.legal_moves[to_reserve] == True:
+            self.reserved_cards.append(self.board.current_cards[to_reserve])
+            self.board.remove_card(to_reserve)
+            self.board.populate_board()
+            self.coins[-1] += 1
+            #self.taken_turn = True
+            return True
 
 
-        # TODO: Check if that does it
-
-        # First, subtract the player's current mines from the price, and check if they have enough in total
-        # TODO: ROLL THESE TWO INTO ONE
+    def check_if_can_purchase_card(self, card):
         needed_coins = [max(0, cc - sm) for cc, sm in zip(card.cost, self.mines)]
         needed_gold = [max(0, cc - sc) for cc, sc in zip(needed_coins, self.coins[:-1])]
         if sum(needed_gold) > self.gold:
             print(f"You do not have enough coins, you need: \n {needed_gold[0]} red, \n {needed_gold[1]} green,"
                   f"\n {needed_gold[2]} blue, \n {needed_gold[3]} black, , \n {needed_gold[4]}.")
+            return False # Cannot purchase card
+
+        return needed_coins
+    def purchase_card(self, card_to_purchase, from_reserved):
+        if from_reserved:
+            card = self.reserved_cards[card_to_purchase]
+        else:
+            card = self.board.current_cards[card_to_purchase]
+        # TODO: Check if that does it
+        #
+        # # First, subtract the player's current mines from the price, and check if they have enough in total
+        # # TODO: ROLL THESE TWO INTO ONE
+        # needed_coins = [max(0, cc - sm) for cc, sm in zip(card.cost, self.mines)]
+        # needed_gold = [max(0, cc - sc) for cc, sc in zip(needed_coins, self.coins[:-1])]
+        # if sum(needed_gold) > self.gold:
+        #     print(f"You do not have enough coins, you need: \n {needed_gold[0]} red, \n {needed_gold[1]} green,"
+        #           f"\n {needed_gold[2]} blue, \n {needed_gold[3]} black, , \n {needed_gold[4]}.")
+        #     return
+
+
+        needed_coins = self.legal_moves[len(self.board.current_cards) + card_to_purchase + from_reserved * 3]
+        if not needed_coins:
             return
 
         # If they have enough, subtract coins needed from their coin base
@@ -121,8 +143,62 @@ class Player:
         self.cards.append(card)
         self.update_mines_and_points_and_nobles()
 
-        self.board.remove_card(card) # Remove the added card
+        if not from_reserved:
+            self.board.remove_card(card) # Remove the added card
+        else:
+            self.reserved_cards.pop(card_to_purchase)
+            
         self.board.populate_board() # Re-populate the board
+
+    def get_legal_moves(self,existing_dict=None, one_hot=False):
+        """
+        :param one_hot: Whether or not to return the legal moves as a true one-hot encoding, or have the coin options
+        # be one-hot vectors themselves
+        :return: list of all legal moves the player can make
+        """
+
+        # JUST MAKE THE FUCKING DICTIONARY WHEN YOU'RE DOING IT ANYWAY
+            # THIS IS TO RESET ALL VALUES TO FALSE, YOU DUNCE
+        if existing_dict == None:
+            all_moves = [0] * 52 # 12 reserve, 12 buy, 5 grab double, 10 grab single, 3 buy reserved cards
+            all_moves = {i: False for i in range(27)} # Reserve cards, buy cards, buy reserved cards
+            # OK SO WE REALLY DON'T NEED TO DO THESE TWO THINGS
+            all_moves.update({i: False for i in [[0] * i + [2] + [0] * (4-i) for i in range(5)]}) # ARISE! CHILD OF BLASPHEMY!
+            all_moves.update({i: False for i in unique_combinations}) # Grab 1 coin combinations
+            # {0-26: buy/reserve cards, [0,0,i,0,0]: grab i coins from 3rd place}
+            all_moves = {}
+        else:
+            all_moves = dict.fromkeys(self.legal_moves, False)
+
+        # 0-12: reserve cards:
+        num_cards = len(self.board.current_cards)
+        if len(self.reserved_cards) > 3 and sum(self.coins) > 10:
+            for i in range(num_cards):
+                all_moves[i] = True
+
+        offset = num_cards
+        if not one_hot:
+            # 13-27: buy cards from board or from reserved
+            for i, card in enumerate(self.board.current_cards + self.reserved_cards):
+                needed_coins = self.check_if_can_purchase_card(card)
+                if needed_coins:
+                    all_moves[offset + i] = needed_coins # if possible to buy the card, set as legal action
+            offset += num_cards
+
+            # 27-??: take coins
+            if sum(self.coins) > 10:
+                for p, combination in enumerate(unique_combinations):
+                    r = 0 # When you really wanna do lists anymore
+                    for i, coin in enumerate(combination):
+                        if self.board.coins[i] >= coin:
+                            r += 1
+                    if r-1 == 5:
+                        if not one_hot:
+                            all_moves[combination] = True
+                        else:
+                            all_moves[p+offset] = True
+
+        return all_moves
 
         # current_cost = card.cost # To manipulate and check against
         # current_cost = [cc - sm for cc, sm in zip(card.cost, self.mines)]

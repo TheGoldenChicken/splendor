@@ -43,7 +43,7 @@ class Board:
         self.deck = [None] * 3 # One for each level of cards
         self.nobles = [None] * 3
         self.noble_deck = []
-        self.coins = [0,0,0,0,0,0]
+        self.coins = [0,0,0,0,0,0] #RGBBW - GOLD
 
     def reset_coins(self, players):
         self.coins = [7,7,7,7,7,5] #RGBBW - GOLD

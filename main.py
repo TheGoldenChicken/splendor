@@ -25,9 +25,8 @@ for noble in new_board.nobles:
     # Roll board.remove_card and board.populate_board into one?
     # Update everything to use numpy arrays?
         # Make new version probably
-    # Add -v options to basically every functino to prevent RL agent spamming console
-
-# Press the green button in the gutter to run the script.
-# if __name__ == '__main__':
-#     print_hi('PyCharm')
-#
+    # Add -v options to basically every function to prevent RL agent spamming console
+    # Consider what all the list comprehensions is actually doing, every lc creates a new list and possibly throws it away again
+        # For loops for assignments, lc for creating lists
+    # Consider killing the abomination of player.py
+        # Not the entire class, just the abomination
