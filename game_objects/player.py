@@ -54,46 +54,8 @@ class Player:
         :return:
         """
         return self.legal_moves[coins_to_take]
-        # if sum(self.coins) >= 10:
-        #     print("Too many coins")
-        #     return False
-        #
-        # # Add double numbers if one_hot
-        # if one_hot and 0 < sum(coins_to_take[:5]) < 3: # This shit ugly, np.nonzero would have worked fine
-        #     double_grab = next((i for i, x in enumerate(coins_to_take) if x), None) # coin to grab doubble of
-        #     if not self.board.coins[double_grab] < 2:
-        #         self.coins[double_grab] += 2
-        #         return True # Returns true to indicate turn has passed
-        #     else:
-        #         print("Not enough coins of that type to grab double!")
-        #         return False
-        #
-        # offset = 5 * one_hot
-        # if sum([i for i, e in enumerate(coins_to_take[offset:]) if e != 0]) > 3:
-        #     for i, r in enumerate(coins_to_take[offset:]):
-        #         if self.board.coins[i] < r:
-        #             print("No enough coins of that type to grab")
-        #             return False
-        #         self.coins[i] += r
-        #     # Use walrus operator if possible?
-        #     return True
-        #
-        # print("You're either getting too many coins, or too many of the same type!")
-        # return False
-        #
 
     def reserve_card(self, to_reserve):
-        #
-        # if len(self.reserved_cards) >= 3:
-        #     print('Too many reserved cards')
-        #     return
-        # if self.board.coins[-1] <= 0:
-        #     print('Not enough gold coins')
-        #     return
-        # if sum(self.coins) >= 10:
-        #     print('Too many coins')
-        #     return
-
         if self.legal_moves[to_reserve] == True:
             self.reserved_cards.append(self.board.current_cards[to_reserve])
             self.board.remove_card(to_reserve)
@@ -117,21 +79,10 @@ class Player:
             card = self.reserved_cards[card_to_purchase]
         else:
             card = self.board.current_cards[card_to_purchase]
-        # TODO: Check if that does it
-        #
-        # # First, subtract the player's current mines from the price, and check if they have enough in total
-        # # TODO: ROLL THESE TWO INTO ONE
-        # needed_coins = [max(0, cc - sm) for cc, sm in zip(card.cost, self.mines)]
-        # needed_gold = [max(0, cc - sc) for cc, sc in zip(needed_coins, self.coins[:-1])]
-        # if sum(needed_gold) > self.gold:
-        #     print(f"You do not have enough coins, you need: \n {needed_gold[0]} red, \n {needed_gold[1]} green,"
-        #           f"\n {needed_gold[2]} blue, \n {needed_gold[3]} black, , \n {needed_gold[4]}.")
-        #     return
-
 
         needed_coins = self.legal_moves[len(self.board.current_cards) + card_to_purchase + from_reserved * 3]
         if not needed_coins:
-            return
+            return False
 
         # If they have enough, subtract coins needed from their coin base
         else: # Not really necessary to use else?
@@ -147,7 +98,7 @@ class Player:
             self.board.remove_card(card) # Remove the added card
         else:
             self.reserved_cards.pop(card_to_purchase)
-            
+
         self.board.populate_board() # Re-populate the board
 
     def get_legal_moves(self,existing_dict=None, one_hot=False):
@@ -200,30 +151,10 @@ class Player:
 
         return all_moves
 
-        # current_cost = card.cost # To manipulate and check against
-        # current_cost = [cc - sm for cc, sm in zip(card.cost, self.mines)]
-        #
-        # tmp_player_coins = [0,0,0,0,0]
-        # for cost_type in enumerate(card.cost):
-        #
-        #
-        # current_cost = [cc - sc for cc, sc in zip(card.cost, self.coins)]
-        # for cost in enumerate(card.cost):
-        #
-        # for i, cost in enumerate(card.cost):
-        #     if cost >= self.mines[i]:
-        #         cost = cost - self.mines[i]
-        #         if cost > self.coins[i]:
-        #             diff = cost - self.coins[i]
-        #             needed[i] = diff
-        #
-        #             gold_needed = cost - self.coins[i]
-        #
-        #
-        #         diff = self.mines[i]
-        #         gold_needed += diff
-        #         needed[i] = max(0, cost - self.mines[i])
-        #
-        # if gold_needed > self.coins[-1]:
-        #     print(f'Sorry, you cannot afford {card.cost}, you need {needed} or {gold_needed - self.coins[-1]} more gold coins')
-        #     return
+    def take_turn(self, move):
+        """
+        Change the state of the game based on a specific move
+        :param move: Move to make, must correspond to a key in the self.legal_moves property
+        :return:
+        """
+

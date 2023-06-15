@@ -30,3 +30,5 @@ for noble in new_board.nobles:
         # For loops for assignments, lc for creating lists
     # Consider killing the abomination of player.py
         # Not the entire class, just the abomination
+    # Make it so that messages are shown based on what problems there are in an action...
+        # Example: "You have too many cards", "You do not have enough BLUE coins"
